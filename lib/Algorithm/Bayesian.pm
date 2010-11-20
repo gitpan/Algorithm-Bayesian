@@ -1,13 +1,14 @@
 package Algorithm::Bayesian;
 
 use Carp;
+use Math::BigFloat;
 use strict;
 use warnings;
 
 use constant HAMSTR => '*ham';
 use constant SPAMSTR => '*spam';
 
-our $VERSION = '0.1';
+our $VERSION = '0.2';
 
 =head1 NAME
 
@@ -25,13 +26,20 @@ Algorithm::Bayesian - Bayesian Spam Filtering Algorithm
     $b->spam('spamword1', 'spamword2', ...);
     $b->ham('hamword1', 'hamword2', ...);
 
-    my $bool = $b->test('word1', 'word2', ...);
+    my $pr = $b->test('word1', 'word2', ...);
 
 =head1 DESCRIPTION
+
+Algorithm::Bayesian provide an easy way to handle Bayesian spam filtering algorithm.
 
 =head1 SUBROUTINES/METHODS
 
 =head2 new
+
+    my $b = Algorithm::Bayesian->new(\%hash);
+
+Constructor. Simple hash would be fine. You can use C<Tie::DBI> to store data to RDBM, or othre key-value storage.
+
 =cut
 
 sub new {
@@ -45,6 +53,11 @@ sub new {
 }
 
 =head2 getHam
+
+    my $num = $b->getHam($word);
+
+Get $word count in Ham.
+
 =cut
 
 sub getHam {
@@ -57,6 +70,11 @@ sub getHam {
 }
 
 =head2 getHamNum
+
+    my $num = $b->getHamNum;
+
+Get Ham count.
+
 =cut
 
 sub getHamNum {
@@ -67,6 +85,11 @@ sub getHamNum {
 }
 
 =head2 getSpam
+
+    my $num = $b->getSpam($word);
+
+Get $word count in Spam.
+
 =cut
 
 sub getSpam {
@@ -79,6 +102,11 @@ sub getSpam {
 }
 
 =head2 getSpamNum
+
+    my $num = $b->getSpamNum;
+
+Get Spam count.
+
 =cut
 
 sub getSpamNum {
@@ -89,6 +117,11 @@ sub getSpamNum {
 }
 
 =head2 ham
+
+    $b->ham(@words);
+
+Train @words as Ham.
+
 =cut
 
 sub ham {
@@ -102,7 +135,12 @@ sub ham {
     $s->{HAMSTR}++;
 }
 
-=head2 ham
+=head2 spam
+
+    $b->spam(@words);
+
+Train @words as Spam.
+
 =cut
 
 sub spam {
@@ -117,13 +155,18 @@ sub spam {
 }
 
 =head2 test
+
+    my $pr = $b->test(@words);
+
+Calculate the spam probability of @words. The range of $pr will be in 0 to 1.
+
 =cut
 
 sub test {
     my $self = shift or croak;
 
-    my $a1 = 1;
-    my $a2 = 1;
+    my $a1 = Math::BigFloat->new('1');
+    my $a2 = $a1->copy;
 
     foreach my $w (@_) {
 	my $pr = $self->testWord($w);
@@ -136,10 +179,17 @@ sub test {
 	$a2 *= 2 * (1 - $pr);
     }
 
-    return $a1 / ($a1 + $a2);
+    return ($a1 / ($a1 + $a2))->bstr;
 }
 
 =head2 testWord
+
+    my $pr = $b->testWord($word);
+
+Calculate the spam probability of $word.
+
+The range of $pr will be in 0 to 1.  For non-existence word, it will be 0.5.
+
 =cut
 
 sub testWord {
