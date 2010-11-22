@@ -8,7 +8,7 @@ use warnings;
 use constant HAMSTR => '*ham';
 use constant SPAMSTR => '*spam';
 
-our $VERSION = '0.2';
+our $VERSION = '0.3';
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ Algorithm::Bayesian provide an easy way to handle Bayesian spam filtering algori
 
     my $b = Algorithm::Bayesian->new(\%hash);
 
-Constructor. Simple hash would be fine. You can use C<Tie::DBI> to store data to RDBM, or othre key-value storage.
+Constructor. Simple hash would be fine. You can use L<Tie::DBI> to store data to RDBM, or othre key-value storage.
 
 =cut
 
@@ -56,7 +56,7 @@ sub new {
 
     my $num = $b->getHam($word);
 
-Get $word count in Ham.
+Get C<$word> count in Ham.
 
 =cut
 
@@ -64,31 +64,17 @@ sub getHam {
     my $self = shift or croak;
     my $s = $self->{storage} or croak;
 
-    my $w = shift or croak;
+    my $w = shift;
 
+    return $s->{HAMSTR} if !defined $w;
     return $s->{"h$w"} || 0;
-}
-
-=head2 getHamNum
-
-    my $num = $b->getHamNum;
-
-Get Ham count.
-
-=cut
-
-sub getHamNum {
-    my $self = shift or croak;
-    my $s = $self->{storage} or croak;
-
-    return $s->{HAMSTR};
 }
 
 =head2 getSpam
 
     my $num = $b->getSpam($word);
 
-Get $word count in Spam.
+Get C<$word> count in Spam.
 
 =cut
 
@@ -96,31 +82,17 @@ sub getSpam {
     my $self = shift or croak;
     my $s = $self->{storage} or croak;
 
-    my $w = shift or croak;
+    my $w = shift;
 
+    return $s->{SPAMSTR} if !defined $w;
     return $s->{"s$w"} || 0;
-}
-
-=head2 getSpamNum
-
-    my $num = $b->getSpamNum;
-
-Get Spam count.
-
-=cut
-
-sub getSpamNum {
-    my $self = shift or croak;
-    my $s = $self->{storage} or croak;
-
-    return $s->{SPAMSTR};
 }
 
 =head2 ham
 
     $b->ham(@words);
 
-Train @words as Ham.
+Train C<@words> as Ham.
 
 =cut
 
@@ -139,7 +111,7 @@ sub ham {
 
     $b->spam(@words);
 
-Train @words as Spam.
+Train C<@words> as Spam.
 
 =cut
 
@@ -158,7 +130,7 @@ sub spam {
 
     my $pr = $b->test(@words);
 
-Calculate the spam probability of @words. The range of $pr will be in 0 to 1.
+Calculate the spam probability of C<@words>. The range of C<$pr> will be in 0 to 1.
 
 =cut
 
@@ -186,9 +158,9 @@ sub test {
 
     my $pr = $b->testWord($word);
 
-Calculate the spam probability of $word.
+Calculate the spam probability of C<$word>.
 
-The range of $pr will be in 0 to 1.  For non-existence word, it will be 0.5.
+The range of C<$pr> will be in 0 to 1.  For non-existence word, it will be 0.5.
 
 =cut
 
@@ -196,8 +168,8 @@ sub testWord {
     my $self = shift or croak;
     my $w = shift or croak;
 
-    my $hamNum = $self->getHamNum;
-    my $spamNum = $self->getSpamNum;
+    my $hamNum = $self->getHam;
+    my $spamNum = $self->getSpam;
     my $totalNum = $hamNum + $spamNum;
 
     return 0.5 if 0 == $totalNum;
