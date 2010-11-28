@@ -8,7 +8,7 @@ use warnings;
 use constant HAMSTR => '*ham';
 use constant SPAMSTR => '*spam';
 
-our $VERSION = '0.3';
+our $VERSION = '0.4';
 
 =head1 NAME
 
@@ -38,7 +38,7 @@ Algorithm::Bayesian provide an easy way to handle Bayesian spam filtering algori
 
     my $b = Algorithm::Bayesian->new(\%hash);
 
-Constructor. Simple hash would be fine. You can use L<Tie::DBI> to store data to RDBM, or othre key-value storage.
+Constructor. Simple hash would be fine. You can use L<Tie::DBI> to store data to RDBM, or other key-value storage.
 
 =cut
 
@@ -173,14 +173,19 @@ sub testWord {
     my $totalNum = $hamNum + $spamNum;
 
     return 0.5 if 0 == $totalNum;
-    return 1 if 0 == $hamNum;
-    return 0 if 0 == $spamNum;
+
+    my $wSpam = $self->getSpam($w);
+    my $wHam = $self->getHam($w);
+
+    return 0.5 if 0 == $wSpam and 0 == $wHam;
+    return 0 if 0 == $wSpam;
+    return 1 if 0 == $wHam;
 
     my $hamPr = $hamNum / $totalNum;
     my $spamPr = $spamNum / $totalNum;
 
-    my $a1 = $self->getSpam($w) * $spamPr / $spamNum;
-    my $a2 = $self->getHam($w) * $hamPr / $hamNum;
+    my $a1 = $wSpam * $spamPr / $spamNum;
+    my $a2 = $wHam * $hamPr / $hamNum;
 
     return $a1 / ($a1 + $a2);
 }
@@ -188,44 +193,6 @@ sub testWord {
 =head1 AUTHOR
 
 Gea-Suan Lin, C<< <gslin at gslin.org> >>
-
-=head1 BUGS
-
-Please report any bugs or feature requests to C<bug-algorithm-bayesian at rt.cpan.org>, or through
-the web interface at L<http://rt.cpan.org/NoAuth/ReportBug.html?Queue=Algorithm-Bayesian>.  I will be notified, and then you'll
-automatically be notified of progress on your bug as I make changes.
-
-=head1 SUPPORT
-
-You can find documentation for this module with the perldoc command.
-
-    perldoc Algorithm::Bayesian
-
-
-You can also look for information at:
-
-=over 4
-
-=item * RT: CPAN's request tracker
-
-L<http://rt.cpan.org/NoAuth/Bugs.html?Dist=Algorithm-Bayesian>
-
-=item * AnnoCPAN: Annotated CPAN documentation
-
-L<http://annocpan.org/dist/Algorithm-Bayesian>
-
-=item * CPAN Ratings
-
-L<http://cpanratings.perl.org/d/Algorithm-Bayesian>
-
-=item * Search CPAN
-
-L<http://search.cpan.org/dist/Algorithm-Bayesian/>
-
-=back
-
-
-=head1 ACKNOWLEDGEMENTS
 
 =head1 LICENSE AND COPYRIGHT
 
