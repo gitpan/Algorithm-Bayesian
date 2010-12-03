@@ -15,9 +15,9 @@ name: Algorithm-Bayesian
 provides:
   Algorithm::Bayesian:
     file: lib/Algorithm/Bayesian.pm
-    version: 0.4
+    version: 0.5
 requires:
   Math::BigFloat: 0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.4
+version: 0.5

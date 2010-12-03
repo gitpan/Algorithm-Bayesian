@@ -8,7 +8,7 @@ use warnings;
 use constant HAMSTR => '*ham';
 use constant SPAMSTR => '*spam';
 
-our $VERSION = '0.4';
+our $VERSION = '0.5';
 
 =head1 NAME
 
@@ -137,7 +137,8 @@ Calculate the spam probability of C<@words>. The range of C<$pr> will be in 0 to
 sub test {
     my $self = shift or croak;
 
-    my $a1 = Math::BigFloat->new('1');
+    my $prec = 2 * scalar @_;
+    my $a1 = Math::BigFloat->new('1', $prec);
     my $a2 = $a1->copy;
 
     foreach my $w (@_) {
